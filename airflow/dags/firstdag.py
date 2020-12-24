@@ -1,6 +1,7 @@
 from airflow import DAG
 from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
 from airflow.operators.hive_operator import HiveOperator
+from airflow.operators.bash_operator import BashOperator
 from datetime import datetime, timedelta
 
 default_args = {
@@ -11,7 +12,7 @@ default_args = {
     "retry_delay": timedelta(minutes=5)
 }
 
-with DAG(dag_id="assignment1", schedule_interval="@daily", default_args=default_args, catchup=False) as dag:
+with DAG(dag_id="assignment", schedule_interval="@daily", default_args=default_args, catchup=False) as dag:
 
     parquet_file_import = SparkSubmitOperator(
         task_id="parquet_file_import",
@@ -27,5 +28,19 @@ with DAG(dag_id="assignment1", schedule_interval="@daily", default_args=default_
         SELECT * FROM test_airflowdb
         """,
         dag=dag
+   )    
+
+    dump_file_hdfs = BashOperator(
+        task_id='dump_file_hdfs',
+        bash_command="""
+        hdfs dfs -mkdir -p /data && \
+        hdfs dfs -put -f /usr/local/airflow/dags/files/userdata2.parquet /data
+        """
    )
 
+    dump_allFiles_hdfs = BashOperator(
+        task_id='dump_allFiles_hdfs',
+        bash_command="""
+        hdfs dfs -put -f /usr/local/airflow/dags/files /data
+        """
+   )
