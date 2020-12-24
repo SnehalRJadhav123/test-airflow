@@ -2,6 +2,8 @@ from airflow import DAG
 from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
 from airflow.operators.hive_operator import HiveOperator
 from airflow.operators.bash_operator import BashOperator
+from airflow.operators.email_operator import EmailOperator
+from airflow.operators.slack_operator import SlackAPIPostOperator
 from datetime import datetime, timedelta
 
 default_args = {
@@ -43,4 +45,21 @@ with DAG(dag_id="assignment", schedule_interval="@daily", default_args=default_a
         bash_command="""
         hdfs dfs -put -f /usr/local/airflow/dags/files /data
         """
+   )
+
+ #   email_notification = EmailOperator(
+ #      task_id="email_notification",
+ #      to="snehal.r.jadhav23@gmail.com",
+ #      subject="Assignment completed",
+ #      html_content="""
+ #               <h3>Assignment completed</h3>
+ #           """
+ #  )
+
+    sending_slack_notification = SlackAPIPostOperator(
+        task_id="sending_slack",
+        token="xoxp-1583002105367-1597981360883-1591005142598-f0fcf268fdb7a5028f3f37f0d1ea3f2e",
+        username="airflow",
+        text="DAG Airflow assignment: DONE",
+        channel="#airflow-exploit"
    )
