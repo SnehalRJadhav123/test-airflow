@@ -8,13 +8,13 @@ from datetime import datetime, timedelta
 
 default_args = {
     "owner": "airflow",
-    "start_date": datetime(2020, 12, 22),
+    "start_date": datetime(2021, 1, 1),
     "depends_on_past": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=5)
 }
 
-with DAG(dag_id="assignment", schedule_interval="@daily", default_args=default_args, catchup=False) as dag:
+with DAG(dag_id="assignment", schedule_interval="@hourly", default_args=default_args, catchup=False) as dag:
 
     parquet_file_import = SparkSubmitOperator(
         task_id="parquet_file_import",
@@ -27,7 +27,7 @@ with DAG(dag_id="assignment", schedule_interval="@daily", default_args=default_a
         task_id="read_from_hive",
         hive_cli_conn_id="hive_conn",
         hql="""
-        SELECT * FROM test_airflowdb
+        SELECT * FROM airflowdb
         """,
         dag=dag
    )    
@@ -63,3 +63,27 @@ with DAG(dag_id="assignment", schedule_interval="@daily", default_args=default_a
         text="DAG Airflow assignment: DONE",
         channel="#airflow-exploit"
    )
+
+    create_hive_tables = HiveOperator(
+        task_id="create_hive_tables",
+        hive_cli_conn_id="hive_conn",
+        hql="""
+        CREATE EXTERNAL TABLE IF NOT EXISTS userdata5 (
+        registration_dttm TIMESTAMP,
+        id INT,
+        first_name STRING,
+        last_name STRING,
+        email STRING,
+        gender STRING,
+        ip_address STRING,
+        cc STRING,
+        country STRING,
+        birthdate STRING,
+        salary DOUBLE,
+        title STRING,
+        comments STRING
+        )
+        """,
+        dag=dag
+    )
+    

@@ -25,7 +25,7 @@ df.write.mode("overwrite").saveAsTable("airflowdb")
 df_read_from_hive = spark.sql("select * from airflowdb")
 
 # Dump the data in the form of csv file
-df_read_from_hive.write.csv("hdfs://namenode:9000/user/root/airflowdb.csv")
+df_read_from_hive.write.csv("hdfs://namenode:9000/user/root/airflowdb_test.csv")
 
 # filter on the basis of gender
 df_female = df.filter(df.gender == "Female")
